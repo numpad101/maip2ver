@@ -267,13 +267,14 @@ async def process_change_products_supercell_games_click_product(callback: Callba
         game = "brawl"
     elif callback.data.startswith("admin_shop_supercell_clash_gems_"):
         game = "clash"
-    else:
+    elif callback.data.startswith("admin_shop_supercell_clans_gems_"):
         game = "clans"
 
     kb = InlineKeyboardMarkup(inline_keyboard=[
-        [InlineKeyboardButton(text="Изменить данные продукта", callback_data='vary_' + callback.data)],
-        [InlineKeyboardButton(text="Удалить продукт", callback_data=f'delete_' + game + '_' + callback.data)],
+        [InlineKeyboardButton(text="Изменить данные продукта", callback_data=f"vary_{callback.data}")],
+        [InlineKeyboardButton(text="Удалить продукт", callback_data=f"delete_{game}_{callback.data}")],
     ])
+    print(f"delete_{game}_{callback.data}")
     await state.update_data(game=game)
     await callback.message.edit_text("Выберите действие:", reply_markup=kb)
 
@@ -289,7 +290,7 @@ async def process_change_products_supercell_vary_product(callback: CallbackQuery
         await state.set_state(BroadcastForm.waiting_for_vary_product_brawl)
     elif game == "clash":
         await state.set_state(BroadcastForm.waiting_for_vary_product_clash)
-    else:
+    elif game == "clans":
         await state.set_state(BroadcastForm.waiting_for_vary_product_clans)
 
     await state.update_data(product_id=product_id, game=game)
@@ -320,8 +321,8 @@ async def process_new_product_data_supercell(message: Message, state: FSMContext
 
 async def process_delete_confirmation_supercell(callback: CallbackQuery, state: FSMContext):
     data = callback.data
-
-    if data.startswith('delete_brawl_admin_shop_supercell_clash_gems_'):
+    print(data)
+    if data.startswith('delete_brawl_admin_shop_supercell_brawl_gems_'):
         delete_game = "delete_brawl"
     elif data.startswith('delete_clash_admin_shop_supercell_clash_gems_'):
         delete_game = "delete_clash"
@@ -330,7 +331,7 @@ async def process_delete_confirmation_supercell(callback: CallbackQuery, state: 
         await process_change_products_supercell_games(callback, state)
         await callback.answer("Отмена удаления.")
         return
-    else:
+    elif data.startswith('delete_clans_admin_shop_supercell_clans_gems_'):
         delete_game = "delete_clans"
     product_data = data[len(f'{delete_game}_'):]  # admin_shop_supercell_brawl_gems_123
     parts = product_data.split('_')
@@ -557,6 +558,11 @@ def register_admin_handler(dp: Dispatcher):
         F.data.startswith("admin_shop_supercell_clash_gems_")
     )
     dp.callback_query.register(
+        process_change_products_supercell_games_click_product,
+        F.data.startswith("admin_shop_supercell_clans_gems_")
+    )
+
+    dp.callback_query.register(
         process_change_products_supercell_vary_product,
         F.data.startswith('vary_admin_shop_supercell_brawl_gems_')
     )
@@ -564,11 +570,15 @@ def register_admin_handler(dp: Dispatcher):
         process_change_products_supercell_vary_product,
         F.data.startswith('vary_admin_shop_supercell_clash_gems_')
     )
+    dp.callback_query.register(
+        process_change_products_supercell_vary_product,
+        F.data.startswith('vary_admin_shop_supercell_clans_gems_')
+    )
+
     dp.callback_query.register(process_delete_confirmation_supercell, F.data.startswith('delete_brawl_'))
     dp.callback_query.register(process_delete_confirmation_supercell, F.data.startswith('back_to'))
     dp.callback_query.register(process_delete_confirmation_supercell, F.data.startswith('delete_clash_'))
-
-
+    dp.callback_query.register(process_delete_confirmation_supercell, F.data.startswith('delete_clans_'))
 
     dp.message.register(process_broadcast_message, StateFilter(BroadcastForm.waiting_for_message))
     dp.message.register(process_add_admin, StateFilter(BroadcastForm.waiting_for_new_admin_id))
