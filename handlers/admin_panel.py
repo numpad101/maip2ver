@@ -339,20 +339,20 @@ async def process_delete_confirmation_supercell(callback: CallbackQuery, state: 
     try:
         print()
         # Удаляем продукт из базы данных
-        await system_base.delete_product(f'products_supercell_{delete_game.split("_")[1]}', product_id)
+        await system_base.delete_product(f"products_supercell_{delete_game.split('_')[1]}", product_id)
 
         # Обновляем список продуктов после удаления
-        table = await system_base.get_value(f'products_supercell_{delete_game.split("_")[1]}')
+        table = await system_base.get_value(f"products_supercell_{delete_game.split('_')[1]}")
         kb = []
         if len(table) != 0:
             for item in table:
                 text = f"{item['label']} = {item['price']}, руб."
                 btn = InlineKeyboardButton(
                     text=text,
-                    callback_data=f"admin_shop_supercell_{delete_game.split("_")[1]}_gems_{item['id']}"
+                    callback_data=f"admin_shop_supercell_{delete_game.split('_')[1]}_gems_{item['id']}"
                 )
                 kb.append([btn])
-        kb.append([InlineKeyboardButton(text="+ Добавить продукт", callback_data=f"products_supercell_{delete_game.split("_")[1]}_add_product")])
+        kb.append([InlineKeyboardButton(text="+ Добавить продукт", callback_data=f"products_supercell_{delete_game.split('_')[1]}_add_product")])
 
         await callback.message.edit_text(
             "Продукт удалён.\n\nОбновлённый список продуктов:",
