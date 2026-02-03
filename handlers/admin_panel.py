@@ -54,10 +54,16 @@ async def handler_msg(attr: Message | CallbackQuery, state: FSMContext):
             elif msg == "удалить админа":
                 mess = "Список админов:\n"
                 i = 1
-                for id in admins:
-                    adm_info = await message.bot.get_chat(id)
-                    mess += f"ID `{id}` @{adm_info.username}\n"
-                    i += 1
+                try:
+                    for id in admins:
+                        if id == 0:
+                            continue
+                        adm_info = await message.bot.get_chat(id)
+                        mess += f"{i}. ID `{id}` @{adm_info.username}\n"
+                        i += 1
+                except Exception as e:
+                    print(e)
+                    print(admins)
                 await message.answer("Введите ID админа, чтобы удалить его")
                 await message.answer(escape_markdown_v2(mess), parse_mode="Markdown")
                 await state.set_state(BroadcastForm.waiting_for_delete_admin_id)
@@ -179,9 +185,7 @@ async def process_delete_admin(message: Message, state: FSMContext):
     try:
         id = int(message.text)
         id = await system_base.get_value('admins', {'id':id})
-        print(id, id[0], id[0].get('id'), sep=" _=_ ")
-        print(len(id) != 0)
-        print(config.ADMIN_ID != id[0].get('id'))
+        print(id, id[0].get('id'), sep=" _=_ ")
         if len(id) != 0 and config.ADMIN_ID != id[0].get('id'):
             await message.bot.send_message(id[0].get('id'), "Вы больше не админ.\nПерезапустите бота (/start)")
             text = f"***ВЫ УДАЛИЛИ АДМИНА!***\nID: {id}\n"
