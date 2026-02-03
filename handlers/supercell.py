@@ -71,12 +71,12 @@ async def shop_supercell_products_callback(callback: CallbackQuery):
                 callback_data=f"shop_supercell_{game}_gems_{item['id']}"
             )
             kb.append([btn])
-        # Добавляем кнопку "Назад" сюда
-        back_btn = InlineKeyboardButton(
-            text="Назад",
-            callback_data="shop_back_supercell"
-        )
-        kb.append([back_btn])
+
+    back_btn = InlineKeyboardButton(
+        text="Назад",
+        callback_data="shop_back_supercell"
+    )
+    kb.append([back_btn])
 
     inline_markup = InlineKeyboardMarkup(inline_keyboard=kb)
     await callback.message.edit_media(
@@ -146,4 +146,5 @@ def register_supercell_handlers(dp: Dispatcher):
     dp.callback_query.register(shop_supercell_products_final_callback, F.data.startswith("shop_supercell_clans_gems_"))
     # Обработка кнопки "Назад"
     dp.callback_query.register(shop_supercell_back, F.data == "shop_back_supercell")
+
     dp.callback_query.register(confirm, F.data == "confirm_buy")
