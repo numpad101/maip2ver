@@ -58,11 +58,14 @@ async def send_to_admin(attr, text, now_time):
     # type(attr) = Message or CallbackQuery
     admins = await system_base.get_admins()
     for id in admins:
-        await attr.bot.send_message(id, f"***УВЕДОМЛЕНИЕ***\n"
-                                            f"ID: {attr.from_user.id}\n"
-                                            f"Ник: @{attr.from_user.username}\n"
-                                            f"Продукт: {text}\n"
-                                            f"Время: {now_time}")
+        try:
+            await attr.bot.send_message(id, f"***УВЕДОМЛЕНИЕ***\n"
+                                                f"ID: {attr.from_user.id}\n"
+                                                f"Ник: @{attr.from_user.username}\n"
+                                                f"Продукт: {text}\n"
+                                                f"Время: {now_time}")
+        except:
+            pass
     if type(attr) is CallbackQuery:
         text: str = text.replace("clash", "").replace("brawl", "")
         try:
@@ -75,7 +78,6 @@ async def send_to_admin(attr, text, now_time):
             )
         except Exception as e:
             print(e)
-            print("ASD")
             await attr.message.edit_caption(
                 caption=f"""
                 Уведомление администраторам пришло! Напиши мне в лс, если готов сделать заказ — @MaipMaip\n
